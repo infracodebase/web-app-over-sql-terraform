@@ -1,0 +1,270 @@
+{
+  "nodes": [
+    {
+      "id": "vnet",
+      "label": "Virtual Network",
+      "subtitle": "webapp-dev-vnet",
+      "icon": "/icons/azure/networking/virtual-network.png",
+      "type": "container"
+    },
+    {
+      "id": "appgw-subnet",
+      "label": "Application Gateway Subnet",
+      "subtitle": "10.0.1.0/24",
+      "icon": "/icons/azure/networking/subnet.png",
+      "type": "container",
+      "parentNode": "vnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/networking/network-security-group.png",
+          "position": "bottom-right",
+          "tooltip": "NSG: webapp-dev-appgw-nsg"
+        }
+      ]
+    },
+    {
+      "id": "app-subnet",
+      "label": "App Service Subnet",
+      "subtitle": "10.0.2.0/24",
+      "icon": "/icons/azure/networking/subnet.png",
+      "type": "container",
+      "parentNode": "vnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/networking/network-security-group.png",
+          "position": "bottom-right",
+          "tooltip": "NSG: webapp-dev-app-nsg"
+        }
+      ]
+    },
+    {
+      "id": "db-subnet",
+      "label": "Database Subnet",
+      "subtitle": "10.0.3.0/24",
+      "icon": "/icons/azure/networking/subnet.png",
+      "type": "container",
+      "parentNode": "vnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/networking/network-security-group.png",
+          "position": "bottom-right",
+          "tooltip": "NSG: webapp-dev-db-nsg"
+        }
+      ]
+    },
+    {
+      "id": "pe-subnet",
+      "label": "Private Endpoints Subnet",
+      "subtitle": "10.0.4.0/24",
+      "icon": "/icons/azure/networking/subnet.png",
+      "type": "container",
+      "parentNode": "vnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/networking/network-security-group.png",
+          "position": "bottom-right",
+          "tooltip": "NSG: webapp-dev-pe-nsg"
+        }
+      ]
+    },
+    {
+      "id": "appgw",
+      "label": "Application Gateway",
+      "subtitle": "webapp-dev-appgw",
+      "icon": "/icons/azure/networking/application-gateway.png",
+      "parentNode": "appgw-subnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/security/azure-firewall-web-category.png",
+          "position": "top-right",
+          "tooltip": "WAF Policy enabled"
+        }
+      ]
+    },
+    {
+      "id": "app-service",
+      "label": "App Service",
+      "subtitle": "webapp-dev-app",
+      "icon": "/icons/azure/application/app-service.png",
+      "parentNode": "app-subnet",
+      "decorators": [
+        {
+          "icon": "/icons/azure/identity/managed-identity.png",
+          "position": "top-right",
+          "tooltip": "System Assigned Managed Identity"
+        }
+      ]
+    },
+    {
+      "id": "postgresql",
+      "label": "PostgreSQL Flexible Server",
+      "subtitle": "webapp-dev-postgres",
+      "icon": "/icons/azure/data/azure-database-for-postgresql.png",
+      "parentNode": "db-subnet"
+    },
+    {
+      "id": "keyvault-pe",
+      "label": "Key Vault Private Endpoint",
+      "subtitle": "webapp-dev-kv-pe",
+      "icon": "/icons/azure/networking/private-endpoint.png",
+      "parentNode": "pe-subnet"
+    },
+    {
+      "id": "storage-pe",
+      "label": "Storage Private Endpoint",
+      "subtitle": "webapp-dev-blob-pe",
+      "icon": "/icons/azure/networking/private-endpoint.png",
+      "parentNode": "pe-subnet"
+    },
+    {
+      "id": "keyvault",
+      "label": "Key Vault",
+      "subtitle": "webapp-dev-kv-*",
+      "icon": "/icons/azure/security/key-vault.png",
+      "position": {
+        "relativeTo": "vnet",
+        "side": "right"
+      }
+    },
+    {
+      "id": "storage",
+      "label": "Storage Account",
+      "subtitle": "webappdevst*",
+      "icon": "/icons/azure/storage/storage-account.png",
+      "position": {
+        "relativeTo": "keyvault",
+        "side": "below"
+      }
+    },
+    {
+      "id": "log-analytics",
+      "label": "Log Analytics Workspace",
+      "subtitle": "webapp-dev-law",
+      "icon": "/icons/azure/management/log-analytics-solution.png",
+      "position": {
+        "relativeTo": "storage",
+        "side": "below"
+      }
+    },
+    {
+      "id": "app-insights",
+      "label": "Application Insights",
+      "subtitle": "webapp-dev-ai",
+      "icon": "/icons/azure/management/application-insights.png",
+      "position": {
+        "relativeTo": "log-analytics",
+        "side": "below"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "internet-to-appgw",
+      "source": "appgw",
+      "target": "app-service",
+      "label": "HTTPS traffic",
+      "color": "blue"
+    },
+    {
+      "id": "app-to-db",
+      "source": "app-service",
+      "target": "postgresql",
+      "label": "database queries",
+      "color": "green"
+    },
+    {
+      "id": "app-to-kv-pe",
+      "source": "app-service",
+      "target": "keyvault-pe",
+      "label": "secrets access",
+      "color": "purple"
+    },
+    {
+      "id": "kv-pe-to-kv",
+      "source": "keyvault-pe",
+      "target": "keyvault",
+      "label": "private connection",
+      "color": "purple"
+    },
+    {
+      "id": "app-to-storage-pe",
+      "source": "app-service",
+      "target": "storage-pe",
+      "label": "blob storage",
+      "color": "yellow"
+    },
+    {
+      "id": "storage-pe-to-storage",
+      "source": "storage-pe",
+      "target": "storage",
+      "label": "private connection",
+      "color": "yellow"
+    },
+    {
+      "id": "app-to-insights",
+      "source": "app-service",
+      "target": "app-insights",
+      "label": "telemetry",
+      "color": "red"
+    },
+    {
+      "id": "insights-to-log-analytics",
+      "source": "app-insights",
+      "target": "log-analytics",
+      "label": "logs & metrics",
+      "color": "red"
+    },
+    {
+      "id": "appgw-to-log-analytics",
+      "source": "appgw",
+      "target": "log-analytics",
+      "label": "access logs",
+      "color": "red"
+    },
+    {
+      "id": "postgresql-to-log-analytics",
+      "source": "postgresql",
+      "target": "log-analytics",
+      "label": "database logs",
+      "color": "red"
+    },
+    {
+      "id": "keyvault-to-log-analytics",
+      "source": "keyvault",
+      "target": "log-analytics",
+      "label": "audit logs",
+      "color": "red"
+    },
+    {
+      "id": "storage-to-log-analytics",
+      "source": "storage",
+      "target": "log-analytics",
+      "label": "storage metrics",
+      "color": "red"
+    }
+  ],
+  "legend": {
+    "edges": [
+      {
+        "label": "User Traffic",
+        "color": "blue"
+      },
+      {
+        "label": "Database Access",
+        "color": "green"
+      },
+      {
+        "label": "Security & Secrets",
+        "color": "purple"
+      },
+      {
+        "label": "Storage Access",
+        "color": "yellow"
+      },
+      {
+        "label": "Monitoring & Logging",
+        "color": "red"
+      }
+    ]
+  }
+}
